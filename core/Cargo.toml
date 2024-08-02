@@ -1,0 +1,9 @@
+[package]
+name = "chip8_core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+hexdump = "0.1.2"
+rand = "0.8.5"
+thiserror = "1.0.63"

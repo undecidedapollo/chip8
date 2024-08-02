@@ -1,0 +1,239 @@
+0x0200: _1NNN { nnn: 590 }
+0x0201: 0xEAAC
+0x0202: _ANNN { nnn: 2794 }
+0x0203: _CXNN { x: 14, nn: 170 }
+0x0204: _ANNN { nnn: 2734 }
+0x0205: 0xE0A0
+0x0206: _ANNN { nnn: 224 }
+0x0207: _CXNN { x: 0, nn: 64 }
+0x0208: _4XNN { x: 0, nn: 224 }
+0x0209: 0xE020
+0x020A: _CXNN { x: 0, nn: 224 }
+0x020B: 0xE060
+0x020C: _2NNN { nnn: 224 }
+0x020D: _ANNN { nnn: 224 }
+0x020E: _2NNN { nnn: 32 }
+0x020F: _6XNN { x: 0, nn: 64 }
+0x0210: _2NNN { nnn: 64 }
+0x0211: 0xE080
+0x0212: 0xE0E0
+0x0213: 0xE020
+0x0214: _2NNN { nnn: 32 }
+0x0215: 0xE0E0
+0x0216: _ANNN { nnn: 224 }
+0x0217: 0xE0E0
+0x0218: _2NNN { nnn: 224 }
+0x0219: _4XNN { x: 0, nn: 160 }
+0x021A: 0xE0A0
+0x021B: 0xE0C0
+0x021C: _8XY0 { x: 0, y: 14 }
+0x021D: 0xE080
+0x021E: _CXNN { x: 0, nn: 128 }
+0x021F: _ANNN { nnn: 64 }
+0x0220: _ANNN { nnn: 160 }
+0x0221: _ANNN { nnn: 514 }
+0x0222: _DXYN { x: 10, y: 11, n: 4 }
+0x0223: _00EE
+0x0224: _ANNN { nnn: 514 }
+0x0225: _DXYN { x: 10, y: 11, n: 4 }
+0x0226: _1NNN { nnn: 988 }
+0x0227: _6XNN { x: 8, nn: 1 }
+0x0228: _6XNN { x: 9, nn: 5 }
+0x0229: _6XNN { x: 10, nn: 10 }
+0x022A: _6XNN { x: 11, nn: 1 }
+0x022B: _6XNN { x: 5, nn: 42 }
+0x022C: _6XNN { x: 6, nn: 43 }
+0x022D: _ANNN { nnn: 534 }
+0x022E: _DXYN { x: 8, y: 11, n: 4 }
+0x022F: _ANNN { nnn: 574 }
+0x0230: _DXYN { x: 9, y: 11, n: 4 }
+0x0231: _ANNN { nnn: 514 }
+0x0232: _3XNN { x: 6, nn: 43 }
+0x0233: _ANNN { nnn: 518 }
+0x0234: _DXYN { x: 10, y: 11, n: 4 }
+0x0235: _6XNN { x: 11, nn: 6 }
+0x0236: _ANNN { nnn: 538 }
+0x0237: _DXYN { x: 8, y: 11, n: 4 }
+0x0238: _ANNN { nnn: 574 }
+0x0239: _DXYN { x: 9, y: 11, n: 4 }
+0x023A: _ANNN { nnn: 518 }
+0x023B: _4XNN { x: 5, nn: 42 }
+0x023C: _ANNN { nnn: 514 }
+0x023D: _DXYN { x: 10, y: 11, n: 4 }
+0x023E: _6XNN { x: 11, nn: 11 }
+0x023F: _ANNN { nnn: 542 }
+0x0240: _DXYN { x: 8, y: 11, n: 4 }
+0x0241: _ANNN { nnn: 574 }
+0x0242: _DXYN { x: 9, y: 11, n: 4 }
+0x0243: _ANNN { nnn: 518 }
+0x0244: _5XY0 { x: 5, y: 6 }
+0x0245: _ANNN { nnn: 514 }
+0x0246: _DXYN { x: 10, y: 11, n: 4 }
+0x0247: _6XNN { x: 11, nn: 16 }
+0x0248: _ANNN { nnn: 550 }
+0x0249: _DXYN { x: 8, y: 11, n: 4 }
+0x024A: _ANNN { nnn: 574 }
+0x024B: _DXYN { x: 9, y: 11, n: 4 }
+0x024C: _ANNN { nnn: 518 }
+0x024D: _7XNN { x: 6, nn: 255 }
+0x024E: _4XNN { x: 6, nn: 42 }
+0x024F: _ANNN { nnn: 514 }
+0x0250: _DXYN { x: 10, y: 11, n: 4 }
+0x0251: _6XNN { x: 11, nn: 21 }
+0x0252: _ANNN { nnn: 558 }
+0x0253: _DXYN { x: 8, y: 11, n: 4 }
+0x0254: _ANNN { nnn: 574 }
+0x0255: _DXYN { x: 9, y: 11, n: 4 }
+0x0256: _ANNN { nnn: 518 }
+0x0257: _9XY0 { x: 5, y: 6 }
+0x0258: _ANNN { nnn: 514 }
+0x0259: _DXYN { x: 10, y: 11, n: 4 }
+0x025A: _6XNN { x: 11, nn: 26 }
+0x025B: _ANNN { nnn: 562 }
+0x025C: _DXYN { x: 8, y: 11, n: 4 }
+0x025D: _ANNN { nnn: 574 }
+0x025E: _DXYN { x: 9, y: 11, n: 4 }
+0x025F: _2NNN { nnn: 578 }
+0x0260: _6XNN { x: 8, nn: 23 }
+0x0261: _6XNN { x: 9, nn: 27 }
+0x0262: _6XNN { x: 10, nn: 32 }
+0x0263: _6XNN { x: 11, nn: 1 }
+0x0264: _ANNN { nnn: 522 }
+0x0265: _DXYN { x: 8, y: 11, n: 4 }
+0x0266: _ANNN { nnn: 566 }
+0x0267: _DXYN { x: 9, y: 11, n: 4 }
+0x0268: _ANNN { nnn: 514 }
+0x0269: _DXYN { x: 10, y: 11, n: 4 }
+0x026A: _6XNN { x: 11, nn: 6 }
+0x026B: _ANNN { nnn: 554 }
+0x026C: _DXYN { x: 8, y: 11, n: 4 }
+0x026D: _ANNN { nnn: 522 }
+0x026E: _DXYN { x: 9, y: 11, n: 4 }
+0x026F: _ANNN { nnn: 518 }
+0x0270: _8XY0 { x: 7, y: 5 }
+0x0271: _4XNN { x: 7, nn: 42 }
+0x0272: _ANNN { nnn: 514 }
+0x0273: _DXYN { x: 10, y: 11, n: 4 }
+0x0274: _6XNN { x: 11, nn: 11 }
+0x0275: _ANNN { nnn: 554 }
+0x0276: _DXYN { x: 8, y: 11, n: 4 }
+0x0277: _ANNN { nnn: 526 }
+0x0278: _DXYN { x: 9, y: 11, n: 4 }
+0x0279: _ANNN { nnn: 518 }
+0x027A: _6XNN { x: 7, nn: 42 }
+0x027B: _8XY1 { x: 7, y: 11 }
+0x027C: _4XNN { x: 7, nn: 43 }
+0x027D: _ANNN { nnn: 514 }
+0x027E: _DXYN { x: 10, y: 11, n: 4 }
+0x027F: _6XNN { x: 11, nn: 16 }
+0x0280: _ANNN { nnn: 554 }
+0x0281: _DXYN { x: 8, y: 11, n: 4 }
+0x0282: _ANNN { nnn: 530 }
+0x0283: _DXYN { x: 9, y: 11, n: 4 }
+0x0284: _ANNN { nnn: 518 }
+0x0285: _6XNN { x: 6, nn: 120 }
+0x0286: _6XNN { x: 7, nn: 31 }
+0x0287: _8XY2 { x: 7, y: 6 }
+0x0288: _4XNN { x: 7, nn: 24 }
+0x0289: _ANNN { nnn: 514 }
+0x028A: _DXYN { x: 10, y: 11, n: 4 }
+0x028B: _6XNN { x: 11, nn: 21 }
+0x028C: _ANNN { nnn: 554 }
+0x028D: _DXYN { x: 8, y: 11, n: 4 }
+0x028E: _ANNN { nnn: 534 }
+0x028F: _DXYN { x: 9, y: 11, n: 4 }
+0x0290: _ANNN { nnn: 518 }
+0x0291: _6XNN { x: 6, nn: 120 }
+0x0292: _6XNN { x: 7, nn: 31 }
+0x0293: _8XY3 { x: 7, y: 6 }
+0x0294: _4XNN { x: 7, nn: 103 }
+0x0295: _ANNN { nnn: 514 }
+0x0296: _DXYN { x: 10, y: 11, n: 4 }
+0x0297: _6XNN { x: 11, nn: 26 }
+0x0298: _ANNN { nnn: 554 }
+0x0299: _DXYN { x: 8, y: 11, n: 4 }
+0x029A: _ANNN { nnn: 538 }
+0x029B: _DXYN { x: 9, y: 11, n: 4 }
+0x029C: _ANNN { nnn: 518 }
+0x029D: _6XNN { x: 6, nn: 140 }
+0x029E: _6XNN { x: 7, nn: 140 }
+0x029F: _8XY4 { x: 7, y: 6 }
+0x02A0: _4XNN { x: 7, nn: 24 }
+0x02A1: _ANNN { nnn: 514 }
+0x02A2: _DXYN { x: 10, y: 11, n: 4 }
+0x02A3: _6XNN { x: 8, nn: 44 }
+0x02A4: _6XNN { x: 9, nn: 48 }
+0x02A5: _6XNN { x: 10, nn: 52 }
+0x02A6: _6XNN { x: 11, nn: 1 }
+0x02A7: _ANNN { nnn: 554 }
+0x02A8: _DXYN { x: 8, y: 11, n: 4 }
+0x02A9: _ANNN { nnn: 542 }
+0x02AA: _DXYN { x: 9, y: 11, n: 4 }
+0x02AB: _ANNN { nnn: 518 }
+0x02AC: _6XNN { x: 6, nn: 140 }
+0x02AD: _6XNN { x: 7, nn: 120 }
+0x02AE: _8XY5 { x: 7, y: 6 }
+0x02AF: _4XNN { x: 7, nn: 236 }
+0x02B0: _ANNN { nnn: 514 }
+0x02B1: _DXYN { x: 10, y: 11, n: 4 }
+0x02B2: _6XNN { x: 11, nn: 6 }
+0x02B3: _ANNN { nnn: 554 }
+0x02B4: _DXYN { x: 8, y: 11, n: 4 }
+0x02B5: _ANNN { nnn: 546 }
+0x02B6: _DXYN { x: 9, y: 11, n: 4 }
+0x02B7: _ANNN { nnn: 518 }
+0x02B8: _6XNN { x: 6, nn: 224 }
+0x02B9: _8XYE { x: 6, y: 6 }
+0x02BA: _4XNN { x: 6, nn: 192 }
+0x02BB: _ANNN { nnn: 514 }
+0x02BC: _DXYN { x: 10, y: 11, n: 4 }
+0x02BD: _6XNN { x: 11, nn: 11 }
+0x02BE: _ANNN { nnn: 554 }
+0x02BF: _DXYN { x: 8, y: 11, n: 4 }
+0x02C0: _ANNN { nnn: 566 }
+0x02C1: _DXYN { x: 9, y: 11, n: 4 }
+0x02C2: _ANNN { nnn: 518 }
+0x02C3: _6XNN { x: 6, nn: 15 }
+0x02C4: _8XY6 { x: 6, y: 6 }
+0x02C5: _4XNN { x: 6, nn: 7 }
+0x02C6: _ANNN { nnn: 514 }
+0x02C7: _DXYN { x: 10, y: 11, n: 4 }
+0x02C8: _6XNN { x: 11, nn: 16 }
+0x02C9: _ANNN { nnn: 570 }
+0x02CA: _DXYN { x: 8, y: 11, n: 4 }
+0x02CB: _ANNN { nnn: 542 }
+0x02CC: _DXYN { x: 9, y: 11, n: 4 }
+0x02CD: _ANNN { nnn: 1000 }
+0x02CE: _6XNN { x: 0, nn: 0 }
+0x02CF: _6XNN { x: 1, nn: 48 }
+0x02D0: _FX55 { x: 1 }
+0x02D1: _ANNN { nnn: 1001 }
+0x02D2: _FX65 { x: 0 }
+0x02D3: _ANNN { nnn: 518 }
+0x02D4: _4XNN { x: 0, nn: 48 }
+0x02D5: _ANNN { nnn: 514 }
+0x02D6: _DXYN { x: 10, y: 11, n: 4 }
+0x02D7: _6XNN { x: 11, nn: 21 }
+0x02D8: _ANNN { nnn: 570 }
+0x02D9: _DXYN { x: 8, y: 11, n: 4 }
+0x02DA: _ANNN { nnn: 534 }
+0x02DB: _DXYN { x: 9, y: 11, n: 4 }
+0x02DC: _ANNN { nnn: 1000 }
+0x02DD: _6XNN { x: 6, nn: 137 }
+0x02DE: _FX33 { x: 6 }
+0x02DF: _FX65 { x: 2 }
+0x02E0: _ANNN { nnn: 514 }
+0x02E1: _3XNN { x: 0, nn: 1 }
+0x02E2: _ANNN { nnn: 518 }
+0x02E3: _3XNN { x: 1, nn: 3 }
+0x02E4: _ANNN { nnn: 518 }
+0x02E5: _3XNN { x: 2, nn: 7 }
+0x02E6: _ANNN { nnn: 518 }
+0x02E7: _DXYN { x: 10, y: 11, n: 4 }
+0x02E8: _6XNN { x: 11, nn: 26 }
+0x02E9: _ANNN { nnn: 526 }
+0x02EA: _DXYN { x: 8, y: 11, n: 4 }
+0x02EB: _ANNN { nnn: 574 }
+0x02EC: _DXYN { x: 9, y: 11, n: 4 }
+0x02ED: _1NNN { nnn: 584 }
+0x02EE: _1NNN { nnn: 988 }
