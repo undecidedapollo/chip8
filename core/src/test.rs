@@ -1,6 +1,6 @@
 use crate::{
     opcodes::{convert_opcodes_into_u8, OpCodes},
-    Chip8Screen, CPU,
+    Chip8CPU, Chip8Input, Chip8Screen, CPU,
 };
 
 pub(crate) struct NoopScreen;
@@ -24,21 +24,30 @@ pub(crate) fn u16_to_u8(data: &[u16]) -> Vec<u8> {
         .collect::<Vec<u8>>()
 }
 
-pub(crate) fn run_program<T: Chip8Screen>(cpu: &mut CPU<'_, T>, data: &[u16]) -> () {
+pub(crate) fn run_program<TScreen: Chip8Screen, TInput: Chip8Input>(
+    cpu: &mut CPU<'_, TScreen, TInput>,
+    data: &[u16],
+) -> () {
     cpu.load_program(u16_to_u8(data).as_slice()).ok();
     for _ in 0..data.len() {
         cpu.step().ok();
     }
 }
 
-pub(crate) fn run_from_program_counter<T: Chip8Screen>(cpu: &mut CPU<'_, T>, data: &[u16]) -> () {
+pub(crate) fn run_from_program_counter<TScreen: Chip8Screen, TInput: Chip8Input>(
+    cpu: &mut CPU<'_, TScreen, TInput>,
+    data: &[u16],
+) -> () {
     cpu.load_at_program_counter(u16_to_u8(data).as_slice()).ok();
     for _ in 0..data.len() {
         cpu.step().ok();
     }
 }
 
-pub fn op_run_program<T: Chip8Screen>(cpu: &mut CPU<'_, T>, data: &[OpCodes]) -> () {
+pub fn op_run_program<TScreen: Chip8Screen, TInput: Chip8Input>(
+    cpu: &mut CPU<'_, TScreen, TInput>,
+    data: &[OpCodes],
+) -> () {
     cpu.load_program(convert_opcodes_into_u8(data).as_slice())
         .ok();
     for _ in 0..data.len() {
@@ -46,8 +55,8 @@ pub fn op_run_program<T: Chip8Screen>(cpu: &mut CPU<'_, T>, data: &[OpCodes]) ->
     }
 }
 
-pub(crate) fn op_run_from_program_counter<T: Chip8Screen>(
-    cpu: &mut CPU<'_, T>,
+pub(crate) fn op_run_from_program_counter<TScreen: Chip8Screen, TInput: Chip8Input>(
+    cpu: &mut CPU<'_, TScreen, TInput>,
     data: &[OpCodes],
 ) -> () {
     cpu.load_at_program_counter(convert_opcodes_into_u8(data).as_slice())

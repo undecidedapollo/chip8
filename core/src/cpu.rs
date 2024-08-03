@@ -1,10 +1,16 @@
-use std::{f32::consts::E, fmt::Debug, io::Write, mem};
+use std::{
+    f32::consts::E,
+    fmt::Debug,
+    io::Write,
+    mem, thread,
+    time::{Duration, Instant},
+};
 
 use rand::Rng;
 
 use crate::{
     opcodes::{Chip8Error, OpCodes},
-    Chip8Screen,
+    Chip8Input, Chip8Screen,
 };
 
 const PGRM_LOAD_START_ADDR: u16 = 0x200;
@@ -45,10 +51,16 @@ const FONT_BUFFER : [u8; 80] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80,
 ];
 
-pub struct CPU<'a, TScreen>
+pub trait Chip8CPU {
+    fn step(&mut self) -> Result<(), Chip8Error>;
+}
+
+pub struct CPU<'a, TScreen, TInput>
 where
     TScreen: Chip8Screen,
+    TInput: Chip8Input,
 {
+    // memory: Box<[u8; 65536]>,
     memory: Box<[u8; 4096]>,
     v: [u8; 16],
     i: u16,
@@ -57,22 +69,28 @@ where
     pc: u16,
     stack_ptr: u16,
     screen: &'a TScreen,
+    input: &'a TInput,
+    last_decrement: Instant,
 }
 
-impl<'a, T> CPU<'a, T>
+impl<'a, TScreen, TInput> CPU<'a, TScreen, TInput>
 where
-    T: Chip8Screen,
+    TScreen: Chip8Screen,
+    TInput: Chip8Input,
 {
-    pub fn new(screen: &'a T) -> Self {
+    pub fn new(screen: &'a TScreen, input: &'a TInput) -> Self {
         let mut cpu = CPU {
+            // memory: Box::new([0; 65536]),
             memory: Box::new([0; 4096]),
             v: [0; 16],
             i: 0,
             timer: 0,
             sound: 0,
             pc: 0x200,
-            screen,
             stack_ptr: 0xFFF,
+            screen,
+            input,
+            last_decrement: Instant::now(),
         };
 
         cpu.memory[0x50..]
@@ -107,8 +125,25 @@ where
     pub fn load_program(&mut self, data: &[u8]) -> Result<(), std::io::Error> {
         self.load_into_memory(PGRM_LOAD_START_ADDR, data)
     }
+}
 
-    pub fn step(&mut self) -> Result<(), Chip8Error> {
+impl<TScreen, TInput> Chip8CPU for CPU<'_, TScreen, TInput>
+where
+    TScreen: Chip8Screen,
+    TInput: Chip8Input,
+{
+    fn step(&mut self) -> Result<(), Chip8Error> {
+        if self.last_decrement.elapsed().as_millis() >= 16 {
+            self.last_decrement = Instant::now();
+            if self.timer > 0 {
+                self.timer -= 1;
+            }
+
+            if self.sound > 0 {
+                self.sound -= 1;
+            }
+        }
+
         let op1 = self.memory[self.pc as usize];
         let op2 = self.memory[self.pc as usize + 1];
         let opcode = OpCodes::try_from((op1, op2))?;
@@ -209,6 +244,7 @@ where
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval | yval);
+                self.v.set(0xF, 0);
                 Ok(true)
             }
             // Set VX to VX AND VY
@@ -216,6 +252,7 @@ where
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval & yval);
+                self.v.set(0xF, 0);
                 Ok(true)
             }
             // Set VX to VX XOR VY
@@ -223,6 +260,7 @@ where
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval ^ yval);
+                self.v.set(0xF, 0);
                 Ok(true)
             }
             // Add the value of register VY to register VX
@@ -323,16 +361,36 @@ where
                 Ok(true)
             }
             //Skip the following instruction if the key corresponding to the hex value currently stored in register VX is pressed
-            OpCodes::_EX9E { x } => Err(Chip8Error::UnimplementedOpcodeError(opcode)),
+            OpCodes::_EX9E { x } => {
+                let key = self.input.get_key();
+                if key == Some(self.v[x as usize]) {
+                    self.pc += 2;
+                }
+                Ok(true)
+            }
             // Skip the following instruction if the key corresponding to the hex value currently stored in register VX is not pressed
-            OpCodes::_EXA1 { x } => Err(Chip8Error::UnimplementedOpcodeError(opcode)),
+            OpCodes::_EXA1 { x } => {
+                let key = self.input.get_key();
+                if key != Some(self.v[x as usize]) {
+                    self.pc += 2;
+                }
+                Ok(true)
+            }
             // Store the current value of the delay timer in register VX
             OpCodes::_FX07 { x } => {
                 self.v.set(x, self.timer);
                 Ok(true)
             }
             // Wait for a keypress and store the result in register VX
-            OpCodes::_FX0A { x } => Err(Chip8Error::UnimplementedOpcodeError(opcode)),
+            OpCodes::_FX0A { x } => {
+                let key = self.input.get_key();
+                if key.is_some() {
+                    self.v.set(x, key.unwrap());
+                    Ok(true)
+                } else {
+                    Ok(false)
+                }
+            }
             // Set the delay timer to the value of register VX
             OpCodes::_FX15 { x } => {
                 self.timer = self.v.nth(x);
@@ -397,9 +455,10 @@ where
     }
 }
 
-impl<TScreen> Debug for CPU<'_, TScreen>
+impl<TScreen, TInput> Debug for CPU<'_, TScreen, TInput>
 where
     TScreen: Chip8Screen,
+    TInput: Chip8Input,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mapped_registers = self
@@ -419,11 +478,11 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test::NoopScreen;
+    use crate::{test::NoopScreen, NoopInput};
 
     #[test]
     fn test_cpu() {
-        let cpu = CPU::new(&NoopScreen);
+        let cpu = CPU::new(&NoopScreen, &NoopInput);
         hexdump::hexdump(cpu.memory.as_ref());
         let first_font_char = cpu.memory[usize::from(FONT_START_ADDR)];
         assert_eq!(first_font_char, 0xF0);
@@ -440,7 +499,7 @@ mod tests {
 
         #[test]
         fn _3xnn() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             op_run_program(
                 &mut cpu,
                 [
@@ -459,7 +518,7 @@ mod tests {
 
         #[test]
         fn _6xnn() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -469,7 +528,7 @@ mod tests {
 
         #[test]
         fn _7xnn() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -481,7 +540,7 @@ mod tests {
 
         #[test]
         fn _8xy0() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -494,7 +553,7 @@ mod tests {
 
         #[test]
         fn _8xy1() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -507,7 +566,7 @@ mod tests {
 
         #[test]
         fn _8xy2() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -520,7 +579,7 @@ mod tests {
 
         #[test]
         fn _8xy3() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -533,7 +592,7 @@ mod tests {
 
         #[test]
         fn _8xy4() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -557,7 +616,7 @@ mod tests {
 
         #[test]
         fn _8xy5() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -581,7 +640,7 @@ mod tests {
 
         #[test]
         fn _8xy6() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -607,7 +666,7 @@ mod tests {
 
         #[test]
         fn _8xy7() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
@@ -633,7 +692,7 @@ mod tests {
 
         #[test]
         fn _8xye() {
-            let mut cpu = CPU::new(&NoopScreen);
+            let mut cpu = CPU::new(&NoopScreen, &NoopInput);
             run! {
                 cpu,
                 _6XNN { x: 0, nn: 0x12 },
