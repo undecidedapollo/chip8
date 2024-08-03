@@ -9,7 +9,7 @@ use std::{
 use rand::Rng;
 
 use crate::{
-    opcodes::{Chip8Error, OpCodes},
+    opcodes::{Chip8Error, OpCode},
     Chip8Input, Chip8Screen,
 };
 
@@ -146,22 +146,22 @@ where
 
         let op1 = self.memory[self.pc as usize];
         let op2 = self.memory[self.pc as usize + 1];
-        let opcode = OpCodes::try_from((op1, op2))?;
+        let opcode = OpCode::try_from((op1, op2))?;
         // println!("PC: {:04X} INSTRUCTION: {:?}", self.pc, opcode);
 
         let res: Result<bool, _> = match opcode {
             // Execute machine language subroutine at address
-            OpCodes::_0NNN { .. } => {
+            OpCode::_0NNN { .. } => {
                 Err(Chip8Error::UnimplementedOpcodeError(opcode))
                 // Ok(true)
             }
             // Clear the screen
-            OpCodes::_00E0 => {
+            OpCode::_00E0 => {
                 self.screen.clear();
                 Ok(true)
             }
             //Return from subroutine
-            OpCodes::_00EE => {
+            OpCode::_00EE => {
                 let left = (self.memory[(self.stack_ptr + 1) as usize] as u16) << 8;
                 let right = self.memory[(self.stack_ptr + 2) as usize] as u16;
                 self.pc = left | right;
@@ -176,12 +176,12 @@ where
                 Ok(false)
             }
             // Jump to address NNN
-            OpCodes::_1NNN { nnn } => {
+            OpCode::_1NNN { nnn } => {
                 self.pc = nnn;
                 Ok(false)
             }
             // Execute subroutine at address NNN
-            OpCodes::_2NNN { nnn } => {
+            OpCode::_2NNN { nnn } => {
                 let pc_to_push = self.pc + 2;
                 let left = (pc_to_push >> 8) as u8;
                 let right = pc_to_push as u8;
@@ -196,7 +196,7 @@ where
                 Ok(false)
             }
             // Skip the following instruction if the value of register VX equals NN
-            OpCodes::_3XNN { x, nn } => {
+            OpCode::_3XNN { x, nn } => {
                 let vx_val = self.v.nth(x);
                 if vx_val == nn {
                     self.pc += 2;
@@ -204,7 +204,7 @@ where
                 Ok(true)
             }
             // Skip the following instruction if the value of register VX is not equal to NN
-            OpCodes::_4XNN { x, nn } => {
+            OpCode::_4XNN { x, nn } => {
                 let vx_val = self.v.nth(x);
                 if vx_val != nn {
                     self.pc += 2;
@@ -212,7 +212,7 @@ where
                 Ok(true)
             }
             // Skip the following instruction if the value of register VX is equal to the value of register VY
-            OpCodes::_5XY0 { x, y } => {
+            OpCode::_5XY0 { x, y } => {
                 let vx_val = self.v.nth(x);
                 let vy_val = self.v.nth(y);
                 if vx_val == vy_val {
@@ -221,26 +221,26 @@ where
                 Ok(true)
             }
             // Store number NN in register VX
-            OpCodes::_6XNN { x, nn } => {
+            OpCode::_6XNN { x, nn } => {
                 self.v.set(x, nn);
 
                 Ok(true)
             }
             // Add the value NN to register VX
-            OpCodes::_7XNN { x, nn } => {
+            OpCode::_7XNN { x, nn } => {
                 let xval = self.v.nth(x);
                 self.v.set(x, xval.wrapping_add(nn));
                 Ok(true)
             }
             // Store the value of register VY in register VX
-            OpCodes::_8XY0 { x, y } => {
+            OpCode::_8XY0 { x, y } => {
                 let val = self.v.nth(y);
                 self.v.set(x, val);
 
                 Ok(true)
             }
             // Set VX to VX OR VY
-            OpCodes::_8XY1 { x, y } => {
+            OpCode::_8XY1 { x, y } => {
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval | yval);
@@ -248,7 +248,7 @@ where
                 Ok(true)
             }
             // Set VX to VX AND VY
-            OpCodes::_8XY2 { x, y } => {
+            OpCode::_8XY2 { x, y } => {
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval & yval);
@@ -256,7 +256,7 @@ where
                 Ok(true)
             }
             // Set VX to VX XOR VY
-            OpCodes::_8XY3 { x, y } => {
+            OpCode::_8XY3 { x, y } => {
                 let xval = self.v.nth(x);
                 let yval = self.v.nth(y);
                 self.v.set(x, xval ^ yval);
@@ -266,7 +266,7 @@ where
             // Add the value of register VY to register VX
             // Set VF to 01 if a carry occurs
             // Set VF to 00 if a carry does not occur
-            OpCodes::_8XY4 { x, y } => {
+            OpCode::_8XY4 { x, y } => {
                 let xval = self.v.nth(x) as u16;
                 let yval = self.v.nth(y) as u16;
                 let result = xval + yval;
@@ -277,7 +277,7 @@ where
             // Subtract the value of register VY from register VX
             // Set VF to 00 if a borrow occurs
             // Set VF to 01 if a borrow does not occur
-            OpCodes::_8XY5 { x, y } => {
+            OpCode::_8XY5 { x, y } => {
                 let xval = self.v.nth(x) as u16;
                 let yval = self.v.nth(y) as u16;
                 let result = xval.wrapping_sub(yval);
@@ -297,7 +297,7 @@ where
             // Store the value of register VY shifted right one bit in register VX¹
             // Set register VF to the least significant bit prior to the shift
             // VY is unchanged
-            OpCodes::_8XY6 { x, y } => {
+            OpCode::_8XY6 { x, y } => {
                 let yval = self.v.nth(y);
                 self.v.set(x, yval >> 1);
                 self.v.set(0xF, (yval & 0x01) as u8);
@@ -306,7 +306,7 @@ where
             // Set register VX to the value of VY minus VX
             // Set VF to 00 if a borrow occurs
             // Set VF to 01 if a borrow does not occur
-            OpCodes::_8XY7 { x, y } => {
+            OpCode::_8XY7 { x, y } => {
                 let xval = self.v.nth(x) as u16;
                 let yval = self.v.nth(y) as u16;
                 let result = yval.wrapping_sub(xval);
@@ -318,31 +318,31 @@ where
             // Store the value of register VY shifted left one bit in register VX¹
             // Set register VF to the most significant bit prior to the shift
             // VY is unchanged
-            OpCodes::_8XYE { x, y } => {
+            OpCode::_8XYE { x, y } => {
                 let yval = self.v.nth(y);
                 self.v.set(x, yval << 1);
                 self.v.set(0xF, (yval >> 7) as u8);
                 Ok(true)
             }
             // Skip the following instruction if the value of register VX is not equal to the value of register VY
-            OpCodes::_9XY0 { x, y } => {
+            OpCode::_9XY0 { x, y } => {
                 if self.v.nth(x) != self.v.nth(y) {
                     self.pc += 2;
                 }
                 Ok(true)
             }
             // Store memory address NNN in register I
-            OpCodes::_ANNN { nnn } => {
+            OpCode::_ANNN { nnn } => {
                 self.i = nnn;
                 Ok(true)
             }
             // Jump to address NNN + V0
-            OpCodes::_BNNN { nnn } => {
+            OpCode::_BNNN { nnn } => {
                 self.pc = nnn + self.v[0] as u16;
                 Ok(true)
             }
             // Set VX to a random number with a mask of NN
-            OpCodes::_CXNN { x, nn } => {
+            OpCode::_CXNN { x, nn } => {
                 let val = rand::thread_rng().gen_range(0x00..=0xFF);
                 self.v.set(x, val & nn);
 
@@ -350,7 +350,7 @@ where
             }
             // Draw a sprite at position VX, VY with N bytes of sprite data starting at the address stored in I
             // Set VF to 01 if any set pixels are changed to unset, and 00 otherwise
-            OpCodes::_DXYN { x, y, n } => {
+            OpCode::_DXYN { x, y, n } => {
                 let mem_start = self.i as usize;
                 let mem_end = mem_start + n as usize;
                 let memslice = &self.memory[mem_start..mem_end];
@@ -361,7 +361,7 @@ where
                 Ok(true)
             }
             //Skip the following instruction if the key corresponding to the hex value currently stored in register VX is pressed
-            OpCodes::_EX9E { x } => {
+            OpCode::_EX9E { x } => {
                 let key = self.input.get_key();
                 if key == Some(self.v[x as usize]) {
                     self.pc += 2;
@@ -369,7 +369,7 @@ where
                 Ok(true)
             }
             // Skip the following instruction if the key corresponding to the hex value currently stored in register VX is not pressed
-            OpCodes::_EXA1 { x } => {
+            OpCode::_EXA1 { x } => {
                 let key = self.input.get_key();
                 if key != Some(self.v[x as usize]) {
                     self.pc += 2;
@@ -377,12 +377,12 @@ where
                 Ok(true)
             }
             // Store the current value of the delay timer in register VX
-            OpCodes::_FX07 { x } => {
+            OpCode::_FX07 { x } => {
                 self.v.set(x, self.timer);
                 Ok(true)
             }
             // Wait for a keypress and store the result in register VX
-            OpCodes::_FX0A { x } => {
+            OpCode::_FX0A { x } => {
                 let key = self.input.get_key();
                 if key.is_some() {
                     self.v.set(x, key.unwrap());
@@ -392,32 +392,32 @@ where
                 }
             }
             // Set the delay timer to the value of register VX
-            OpCodes::_FX15 { x } => {
+            OpCode::_FX15 { x } => {
                 self.timer = self.v.nth(x);
                 Ok(true)
             }
             // Set the sound timer to the value of register VX
-            OpCodes::_FX18 { x } => {
+            OpCode::_FX18 { x } => {
                 self.sound = self.v.nth(x);
                 Ok(true)
             }
 
             // Add the value stored in register VX to register I
-            OpCodes::_FX1E { x } => {
+            OpCode::_FX1E { x } => {
                 self.i = self.i + self.v[x as usize] as u16;
                 Ok(true)
             }
 
             // Set I to the memory address of the sprite data corresponding to the hexadecimal digit stored in register VX
-            OpCodes::_FX29 { x } => {
+            OpCode::_FX29 { x } => {
                 let vs = self.v[x as usize] % 16;
                 self.i = FONT_START_ADDR + ((vs as u16) * 5);
-                self.pc += 2;
+                // self.pc += 2; // TODO: Why is this here?
                 Ok(true)
             }
 
             // Store the binary-coded decimal equivalent of the value stored in register VX at addresses I, I + 1, and I + 2
-            OpCodes::_FX33 { x } => {
+            OpCode::_FX33 { x } => {
                 let val = self.v.nth(x);
                 self.memory[self.i as usize] = val / 100;
                 self.memory[self.i as usize + 1] = (val / 10) % 10;
@@ -427,7 +427,7 @@ where
 
             // Store the values of registers V0 to VX inclusive in memory starting at address I
             // I is set to I + X + 1 after operation
-            OpCodes::_FX55 { x } => {
+            OpCode::_FX55 { x } => {
                 for reg in 0..=x {
                     self.memory[(self.i + reg as u16) as usize] = self.v.nth(reg);
                 }
@@ -436,7 +436,7 @@ where
             }
             // Fill registers V0 to VX inclusive with the values stored in memory starting at address I
             // I is set to I + X + 1 after operation
-            OpCodes::_FX65 { x } => {
+            OpCode::_FX65 { x } => {
                 for reg in 0..=x {
                     self.v.set(reg, self.memory[(self.i + reg as u16) as usize]);
                 }
@@ -503,12 +503,12 @@ mod tests {
             op_run_program(
                 &mut cpu,
                 [
-                    OpCodes::_6XNN { x: 0, nn: 0x12 },
-                    OpCodes::_6XNN { x: 1, nn: 0x12 },
-                    OpCodes::_3XNN { x: 0, nn: 0x12 },
-                    OpCodes::_7XNN { x: 0, nn: 0x03 },
-                    OpCodes::_3XNN { x: 1, nn: 0x13 },
-                    OpCodes::_7XNN { x: 1, nn: 0x03 },
+                    OpCode::_6XNN { x: 0, nn: 0x12 },
+                    OpCode::_6XNN { x: 1, nn: 0x12 },
+                    OpCode::_3XNN { x: 0, nn: 0x12 },
+                    OpCode::_7XNN { x: 0, nn: 0x03 },
+                    OpCode::_3XNN { x: 1, nn: 0x13 },
+                    OpCode::_7XNN { x: 1, nn: 0x03 },
                 ]
                 .as_slice(),
             );
@@ -625,7 +625,7 @@ mod tests {
             }
             assert_eq!(cpu.v[0], 0x12);
             assert_eq!(cpu.v[1], u8::wrapping_sub(0x13, 0x12));
-            assert_eq!(cpu.v[0xF], 0);
+            assert_eq!(cpu.v[0xF], 1);
             cpu.reset();
             run! {
                 cpu,
@@ -635,7 +635,7 @@ mod tests {
             }
             assert_eq!(cpu.v[0], u8::wrapping_sub(0x12, 0x13));
             assert_eq!(cpu.v[1], 0x13);
-            assert_eq!(cpu.v[0xF], 1);
+            assert_eq!(cpu.v[0xF], 0);
         }
 
         #[test]
@@ -675,7 +675,7 @@ mod tests {
             }
             assert_eq!(cpu.v[0], u8::wrapping_sub(0x13, 0x12));
             assert_eq!(cpu.v[1], 0x13);
-            assert_eq!(cpu.v[0xF], 0);
+            assert_eq!(cpu.v[0xF], 0x01);
 
             cpu.reset();
 
@@ -687,7 +687,7 @@ mod tests {
             }
             assert_eq!(cpu.v[0], 0x12);
             assert_eq!(cpu.v[1], u8::wrapping_sub(0x12, 0x13));
-            assert_eq!(cpu.v[0xF], 1);
+            assert_eq!(cpu.v[0xF], 0x00);
         }
 
         #[test]

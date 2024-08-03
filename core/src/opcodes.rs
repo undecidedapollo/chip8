@@ -1,7 +1,7 @@
 use thiserror::Error;
 
-#[derive(Debug, Clone, Copy)]
-pub enum OpCodes {
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum OpCode {
     _0NNN { nnn: u16 },
     _00E0,
     _00EE,
@@ -52,14 +52,14 @@ pub enum Chip8Error {
     #[error("Invalid opcode: {0}")]
     InvalidOpcodeError(u16),
     #[error("Unknown opcode: {0:?}")]
-    UnknownOpcodeError(OpCodes),
+    UnknownOpcodeError(OpCode),
     #[error("Unimplemented opcode: {0:?}")]
-    UnimplementedOpcodeError(OpCodes),
+    UnimplementedOpcodeError(OpCode),
     #[error("Stack underflow")]
     StackUnderflowError,
 }
 
-impl TryFrom<(u8, u8)> for OpCodes {
+impl TryFrom<(u8, u8)> for OpCode {
     type Error = Chip8Error;
 
     fn try_from((op1, op2): (u8, u8)) -> Result<Self, Self::Error> {
@@ -139,53 +139,60 @@ fn left_bit(hex: u8) -> u8 {
     return hex << 4;
 }
 
-impl From<OpCodes> for (u8, u8) {
-    fn from(op_code: OpCodes) -> Self {
+impl From<OpCode> for (u8, u8) {
+    fn from(op_code: OpCode) -> Self {
         match op_code {
-            OpCodes::_00E0 => (left_bit(0) & 0, 0xE),
-            OpCodes::_00EE => (left_bit(0) & 0, 0xEE),
-            OpCodes::_0NNN { nnn } => (left_bit(0) | (nnn >> 8) as u8, nnn as u8),
-            OpCodes::_1NNN { nnn } => (left_bit(1) | (nnn >> 8) as u8, nnn as u8),
-            OpCodes::_2NNN { nnn } => (left_bit(2) | (nnn >> 8) as u8, nnn as u8),
-            OpCodes::_3XNN { x, nn } => (left_bit(3) | x, nn),
-            OpCodes::_4XNN { x, nn } => (left_bit(4) | x, nn),
-            OpCodes::_5XY0 { x, y } => (left_bit(5) | x, left_bit(y)),
-            OpCodes::_6XNN { x, nn } => (left_bit(6) | x, nn),
-            OpCodes::_7XNN { x, nn } => (left_bit(7) | x, nn),
-            OpCodes::_8XY0 { x, y } => (left_bit(8) | x, left_bit(y)),
-            OpCodes::_8XY1 { x, y } => (left_bit(8) | x, left_bit(y) | 0x01),
-            OpCodes::_8XY2 { x, y } => (left_bit(8) | x, left_bit(y) | 0x02),
-            OpCodes::_8XY3 { x, y } => (left_bit(8) | x, left_bit(y) | 0x03),
-            OpCodes::_8XY4 { x, y } => (left_bit(8) | x, left_bit(y) | 0x04),
-            OpCodes::_8XY5 { x, y } => (left_bit(8) | x, left_bit(y) | 0x05),
-            OpCodes::_8XY6 { x, y } => (left_bit(8) | x, left_bit(y) | 0x06),
-            OpCodes::_8XY7 { x, y } => (left_bit(8) | x, left_bit(y) | 0x07),
-            OpCodes::_8XYE { x, y } => (left_bit(8) | x, left_bit(y) | 0x0E),
-            OpCodes::_9XY0 { x, y } => (left_bit(9) | x, left_bit(y)),
-            OpCodes::_ANNN { nnn } => (left_bit(0xA) | (nnn >> 8) as u8, nnn as u8),
-            OpCodes::_BNNN { nnn } => (left_bit(0xB) | (nnn >> 8) as u8, nnn as u8),
-            OpCodes::_CXNN { x, nn } => (left_bit(0xC) | x, nn),
-            OpCodes::_DXYN { x, y, n } => (left_bit(0xD) | x, left_bit(y) | n),
-            OpCodes::_EX9E { x } => (left_bit(0xE) | x, 0x9E),
-            OpCodes::_EXA1 { x } => (left_bit(0xE) | x, 0xA1),
-            OpCodes::_FX07 { x } => (left_bit(0xF) | x, 0x07),
-            OpCodes::_FX0A { x } => (left_bit(0xF) | x, 0x0A),
-            OpCodes::_FX15 { x } => (left_bit(0xF) | x, 0x15),
-            OpCodes::_FX18 { x } => (left_bit(0xF) | x, 0x18),
-            OpCodes::_FX1E { x } => (left_bit(0xF) | x, 0x1E),
-            OpCodes::_FX29 { x } => (left_bit(0xF) | x, 0x29),
-            OpCodes::_FX33 { x } => (left_bit(0xF) | x, 0x33),
-            OpCodes::_FX55 { x } => (left_bit(0xF) | x, 0x55),
-            OpCodes::_FX65 { x } => (left_bit(0xF) | x, 0x65),
+            OpCode::_00E0 => (left_bit(0) & 0, 0xE),
+            OpCode::_00EE => (left_bit(0) & 0, 0xEE),
+            OpCode::_0NNN { nnn } => (left_bit(0) | (nnn >> 8) as u8, nnn as u8),
+            OpCode::_1NNN { nnn } => (left_bit(1) | (nnn >> 8) as u8, nnn as u8),
+            OpCode::_2NNN { nnn } => (left_bit(2) | (nnn >> 8) as u8, nnn as u8),
+            OpCode::_3XNN { x, nn } => (left_bit(3) | x, nn),
+            OpCode::_4XNN { x, nn } => (left_bit(4) | x, nn),
+            OpCode::_5XY0 { x, y } => (left_bit(5) | x, left_bit(y)),
+            OpCode::_6XNN { x, nn } => (left_bit(6) | x, nn),
+            OpCode::_7XNN { x, nn } => (left_bit(7) | x, nn),
+            OpCode::_8XY0 { x, y } => (left_bit(8) | x, left_bit(y)),
+            OpCode::_8XY1 { x, y } => (left_bit(8) | x, left_bit(y) | 0x01),
+            OpCode::_8XY2 { x, y } => (left_bit(8) | x, left_bit(y) | 0x02),
+            OpCode::_8XY3 { x, y } => (left_bit(8) | x, left_bit(y) | 0x03),
+            OpCode::_8XY4 { x, y } => (left_bit(8) | x, left_bit(y) | 0x04),
+            OpCode::_8XY5 { x, y } => (left_bit(8) | x, left_bit(y) | 0x05),
+            OpCode::_8XY6 { x, y } => (left_bit(8) | x, left_bit(y) | 0x06),
+            OpCode::_8XY7 { x, y } => (left_bit(8) | x, left_bit(y) | 0x07),
+            OpCode::_8XYE { x, y } => (left_bit(8) | x, left_bit(y) | 0x0E),
+            OpCode::_9XY0 { x, y } => (left_bit(9) | x, left_bit(y)),
+            OpCode::_ANNN { nnn } => (left_bit(0xA) | (nnn >> 8) as u8, nnn as u8),
+            OpCode::_BNNN { nnn } => (left_bit(0xB) | (nnn >> 8) as u8, nnn as u8),
+            OpCode::_CXNN { x, nn } => (left_bit(0xC) | x, nn),
+            OpCode::_DXYN { x, y, n } => (left_bit(0xD) | x, left_bit(y) | n),
+            OpCode::_EX9E { x } => (left_bit(0xE) | x, 0x9E),
+            OpCode::_EXA1 { x } => (left_bit(0xE) | x, 0xA1),
+            OpCode::_FX07 { x } => (left_bit(0xF) | x, 0x07),
+            OpCode::_FX0A { x } => (left_bit(0xF) | x, 0x0A),
+            OpCode::_FX15 { x } => (left_bit(0xF) | x, 0x15),
+            OpCode::_FX18 { x } => (left_bit(0xF) | x, 0x18),
+            OpCode::_FX1E { x } => (left_bit(0xF) | x, 0x1E),
+            OpCode::_FX29 { x } => (left_bit(0xF) | x, 0x29),
+            OpCode::_FX33 { x } => (left_bit(0xF) | x, 0x33),
+            OpCode::_FX55 { x } => (left_bit(0xF) | x, 0x55),
+            OpCode::_FX65 { x } => (left_bit(0xF) | x, 0x65),
         }
     }
 }
 
-pub fn convert_opcodes_into_u8_tuples(slice: &[OpCodes]) -> Vec<(u8, u8)> {
+impl From<OpCode> for u16 {
+    fn from(op_code: OpCode) -> Self {
+        let res = <(u8, u8) as From<OpCode>>::from(op_code);
+        (res.0 as u16) * 256 + res.1 as u16
+    }
+}
+
+pub fn convert_opcodes_into_u8_tuples(slice: &[OpCode]) -> Vec<(u8, u8)> {
     slice.iter().map(|&b| b.into()).collect()
 }
 
-pub fn convert_opcodes_into_u8(slice: &[OpCodes]) -> Vec<u8> {
+pub fn convert_opcodes_into_u8(slice: &[OpCode]) -> Vec<u8> {
     slice
         .iter()
         .flat_map(|&b| {
@@ -195,7 +202,7 @@ pub fn convert_opcodes_into_u8(slice: &[OpCodes]) -> Vec<u8> {
         .collect()
 }
 
-pub fn convert_opcodes_into_u16(slice: &[OpCodes]) -> Vec<u16> {
+pub fn convert_opcodes_into_u16(slice: &[OpCode]) -> Vec<u16> {
     slice
         .iter()
         .map(|&b| {
@@ -205,14 +212,14 @@ pub fn convert_opcodes_into_u16(slice: &[OpCodes]) -> Vec<u16> {
         .collect()
 }
 
-pub fn convert_u8_tuples_into_opcodes(slice: &[(u8, u8)]) -> Result<Vec<OpCodes>, Chip8Error> {
+pub fn convert_u8_tuples_into_opcodes(slice: &[(u8, u8)]) -> Result<Vec<OpCode>, Chip8Error> {
     slice
         .iter()
-        .map(|(op1, op2)| OpCodes::try_from((*op1, *op2)))
+        .map(|(op1, op2)| OpCode::try_from((*op1, *op2)))
         .collect()
 }
 
-pub fn convert_u8_into_opcodes(slice: &[u8]) -> Result<Vec<OpCodes>, Chip8Error> {
+pub fn convert_u8_into_opcodes(slice: &[u8]) -> Result<Vec<OpCode>, Chip8Error> {
     slice
         .chunks(2)
         .filter_map(|chunk| {

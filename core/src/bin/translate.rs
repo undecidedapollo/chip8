@@ -1,6 +1,6 @@
 use std::io::Read;
 
-use chip8_core::OpCodes;
+use chip8_core::OpCode;
 
 fn main() {
     let mut file = std::fs::File::open("test.ch8").unwrap();
@@ -12,7 +12,7 @@ fn main() {
         .filter_map(|chunk| {
             // Convert chunk to tuple if it has 2 elements
             if chunk.len() == 2 {
-                if let Ok(opcode) = OpCodes::try_from((chunk[0], chunk[1])) {
+                if let Ok(opcode) = OpCode::try_from((chunk[0], chunk[1])) {
                     Some(format!("{:?}", opcode))
                 } else {
                     Some(format!("0x{:02X}{:02X}", chunk[0], chunk[1]))

@@ -1,5 +1,5 @@
 use crate::{
-    opcodes::{convert_opcodes_into_u8, OpCodes},
+    opcodes::{convert_opcodes_into_u8, OpCode},
     Chip8CPU, Chip8Input, Chip8Screen, CPU,
 };
 
@@ -46,7 +46,7 @@ pub(crate) fn run_from_program_counter<TScreen: Chip8Screen, TInput: Chip8Input>
 
 pub fn op_run_program<TScreen: Chip8Screen, TInput: Chip8Input>(
     cpu: &mut CPU<'_, TScreen, TInput>,
-    data: &[OpCodes],
+    data: &[OpCode],
 ) -> () {
     cpu.load_program(convert_opcodes_into_u8(data).as_slice())
         .ok();
@@ -57,7 +57,7 @@ pub fn op_run_program<TScreen: Chip8Screen, TInput: Chip8Input>(
 
 pub(crate) fn op_run_from_program_counter<TScreen: Chip8Screen, TInput: Chip8Input>(
     cpu: &mut CPU<'_, TScreen, TInput>,
-    data: &[OpCodes],
+    data: &[OpCode],
 ) -> () {
     cpu.load_at_program_counter(convert_opcodes_into_u8(data).as_slice())
         .ok();
@@ -73,7 +73,7 @@ macro_rules! run {
             &mut $cpu,
             [
                 $(
-                    $crate::OpCodes::$opcode { $($field: $value),* },
+                    $crate::OpCode::$opcode { $($field: $value),* },
                 )*
             ].as_slice(),
         )
