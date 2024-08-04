@@ -1,0 +1,167 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'chip8_assembler'",
+      "cargo": {
+        "args": ["test", "--no-run", "--lib", "--package=chip8-assembler"],
+        "filter": {
+          "name": "chip8_assembler",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'chip8-assembler'",
+      "cargo": {
+        "args": ["build", "--bin=chip8-assembler", "--package=chip8-assembler"],
+        "filter": {
+          "name": "chip8-assembler",
+          "kind": "bin"
+        }
+      },
+      "args": ["./asm/a.s8", "./asm/a.ch8"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'chip8-assembler'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=chip8-assembler",
+          "--package=chip8-assembler"
+        ],
+        "filter": {
+          "name": "chip8-assembler",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'chip8_core'",
+      "cargo": {
+        "args": ["test", "--no-run", "--lib", "--package=chip8-core"],
+        "filter": {
+          "name": "chip8_core",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'term'",
+      "cargo": {
+        "args": ["build", "--bin=term", "--package=chip8-core"],
+        "filter": {
+          "name": "term",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'term'",
+      "cargo": {
+        "args": ["test", "--no-run", "--bin=term", "--package=chip8-core"],
+        "filter": {
+          "name": "term",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'translate'",
+      "cargo": {
+        "args": ["build", "--bin=translate", "--package=chip8-core"],
+        "filter": {
+          "name": "translate",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'translate'",
+      "cargo": {
+        "args": ["test", "--no-run", "--bin=translate", "--package=chip8-core"],
+        "filter": {
+          "name": "translate",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'chip8_cli'",
+      "cargo": {
+        "args": ["test", "--no-run", "--lib", "--package=chip8-cli"],
+        "filter": {
+          "name": "chip8_cli",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'chip8-cli'",
+      "cargo": {
+        "args": ["build", "--bin=chip8-cli", "--package=chip8-cli"],
+        "filter": {
+          "name": "chip8-cli",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in executable 'chip8-cli'",
+      "cargo": {
+        "args": ["test", "--no-run", "--bin=chip8-cli", "--package=chip8-cli"],
+        "filter": {
+          "name": "chip8-cli",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

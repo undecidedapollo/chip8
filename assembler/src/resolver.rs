@@ -5,8 +5,16 @@ use chip8_core::OpCode;
 use crate::{
     error::Chip8AssemblerError,
     lexer::Token,
-    parser::{ParseResult, Statement},
+    opcodes::strip_hex_u16,
+    opcodes::strip_hex_u8,
+    parser::{Declaration, ParseResult, Statement},
 };
+
+struct MemPin {
+    label: String,
+    size: u16,
+    members: Option<Vec<u8>>,
+}
 
 pub struct Resolver<TIterator>
 where
@@ -15,6 +23,7 @@ where
     iterated: bool,
     source: TIterator,
     labels: Vec<(String, u16)>,
+    mem_pins: Vec<MemPin>,
     data: Vec<Statement>,
 }
 
@@ -30,6 +39,7 @@ where
             source,
             labels: Vec::new(),
             data: Vec::new(),
+            mem_pins: Vec::new(),
         };
     }
 
@@ -54,6 +64,63 @@ where
                     }
                     self.data.push(statement);
                 }
+                Some(ParseResult::Declaration(Declaration {
+                    label,
+                    size: Some(Token::Number(size)),
+                    members: None,
+                })) => {
+                    self.mem_pins.push(MemPin {
+                        label,
+                        size: strip_hex_u16(&size).unwrap(),
+                        members: None,
+                    });
+                }
+                Some(ParseResult::Declaration(Declaration {
+                    label,
+                    size: None,
+                    members: Some(members),
+                })) => {
+                    self.mem_pins.push(MemPin {
+                        label,
+                        size: members.len() as u16,
+                        members: Some(
+                            members
+                                .iter()
+                                .map(|token| {
+                                    let Token::Number(token) = token else {
+                                        return 0;
+                                    };
+                                    strip_hex_u8(token).unwrap()
+                                })
+                                .collect(),
+                        ),
+                    });
+                }
+                Some(ParseResult::Declaration(Declaration {
+                    label,
+                    size: Some(Token::Number(size)),
+                    members: Some(members),
+                })) => {
+                    assert_eq!(strip_hex_u16(&size).unwrap(), members.len() as u16);
+                    self.mem_pins.push(MemPin {
+                        label,
+                        size: members.len() as u16,
+                        members: Some(
+                            members
+                                .iter()
+                                .map(|token| {
+                                    let Token::Number(token) = token else {
+                                        return 0;
+                                    };
+                                    strip_hex_u8(token).unwrap()
+                                })
+                                .collect(),
+                        ),
+                    });
+                }
+                Some(ParseResult::Declaration(x)) => {
+                    panic!("Invalid declaration: {:?}", x); // TODO: Handle this
+                }
                 Some(ParseResult::Unknown(_)) => {}
                 Some(ParseResult::Comment(_)) => {}
                 None => {
@@ -68,7 +135,17 @@ where
     pub fn resolve(&mut self) -> Result<Vec<u8>, Chip8AssemblerError> {
         self.process_iterator();
 
-        let res = self
+        let (new_current_address, mem_pins_with_addresses) =
+            self.mem_pins
+                .iter()
+                .fold((self.current_address(), Vec::new()), |mut acc, mem_pin| {
+                    let address = acc.0;
+                    acc.0 = acc.0 + mem_pin.size as u16;
+                    acc.1.push((address, mem_pin));
+                    acc
+                });
+
+        let mut code_res = self
             .data
             .iter()
             .map(|statement| {
@@ -80,6 +157,11 @@ where
                             let label = label.to_owned();
                             if let Some((_, address)) =
                                 self.labels.iter().find(|(l, _)| l == &label)
+                            {
+                                return Ok(Token::Number(format!("{:#x}", address)));
+                            } else if let Some((address, _)) = mem_pins_with_addresses
+                                .iter()
+                                .find(|(_, l)| l.label == label)
                             {
                                 return Ok(Token::Number(format!("{:#x}", address)));
                             } else {
@@ -108,6 +190,18 @@ where
             .flat_map(|f| f.clone())
             .collect::<Vec<u8>>();
 
-        return Ok(res);
+        let data_res = mem_pins_with_addresses
+            .iter()
+            .flat_map(|(address, mem_pin)| {
+                let mut buffer = vec![0; mem_pin.size as usize];
+                for (i, member) in mem_pin.members.as_ref().unwrap().iter().enumerate() {
+                    buffer[i] = *member;
+                }
+                return buffer;
+            })
+            .collect::<Vec<u8>>();
+        code_res.extend(data_res);
+        hexdump::hexdump(code_res.as_slice());
+        return Ok(code_res);
     }
 }

@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::{collections::VecDeque, rc::Rc};
 
 use crate::constants::mneumonics::{MAX_OPCODE_LEN, SORTED_MNEUMONICS};
 
@@ -10,7 +10,10 @@ pub enum Token {
     Comment(String),
     Whitespace(char),
     Unknown(char),
+    Symbol(char),
 }
+
+// .data [5]
 
 pub struct Lexer<TIterator>
 where
@@ -161,6 +164,11 @@ where
             '0'..='9' => self.lex_number(c),
             '.' => self.lex_label(c),
             ';' => self.lex_comment(c),
+            '[' => Token::Symbol(c),
+            ']' => Token::Symbol(c),
+            ',' => Token::Symbol(c),
+            ':' => Token::Symbol(c),
+            '=' => Token::Symbol(c),
             _ => Token::Unknown(c),
         }
     }

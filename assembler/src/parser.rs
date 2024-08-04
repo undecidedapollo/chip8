@@ -11,10 +11,18 @@ pub struct Statement {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Declaration {
+    pub label: String,
+    pub size: Option<Token>,
+    pub members: Option<Vec<Token>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParseResult {
     Comment(String),
     Label(String),
     Statement(Statement),
+    Declaration(Declaration),
     Unknown(Vec<Token>),
 }
 
@@ -67,17 +75,35 @@ where
         } else if end_of_statement {
             return Some(ParseResult::Label(label.unwrap()));
         }
-        let token = self.tokens.next();
-        let Some(Token::Mneumonic(mneumonic)) = token else {
-            if label.is_none() {
-                return Some(ParseResult::Unknown(vec![token.unwrap()]));
-            } else {
-                return Some(ParseResult::Unknown(vec![
-                    Token::Label(label.unwrap()),
-                    token.unwrap(),
-                ]));
+        let token = self.tokens.peek().cloned();
+        let mneumonic = match token {
+            Some(Token::Mneumonic(mneumonic)) => {
+                self.tokens.next();
+                mneumonic
+            }
+            Some(Token::Symbol(_)) => {
+                let Some((size, members)) = self.parse_symbol() else {
+                    return Some(ParseResult::Unknown(vec![token.unwrap()]));
+                };
+                self.consume_whitespace();
+                return Some(ParseResult::Declaration(Declaration {
+                    label: label.unwrap(),
+                    size,
+                    members,
+                }));
+            }
+            _ => {
+                if label.is_none() {
+                    return Some(ParseResult::Unknown(vec![token.unwrap()]));
+                } else {
+                    return Some(ParseResult::Unknown(vec![
+                        Token::Label(label.unwrap()),
+                        token.unwrap(),
+                    ]));
+                }
             }
         };
+
         let end_of_statement = self.consume_whitespace();
         if end_of_statement {
             return Some(ParseResult::Statement(Statement {
@@ -113,6 +139,7 @@ where
         };
 
         self.tokens.next();
+        self.consume_whitespace();
         return Some(ParseResult::Statement(Statement {
             label,
             opcode: mneumonic.to_string(),
@@ -145,6 +172,63 @@ where
 
         return operands;
     }
+
+    fn parse_symbol(&mut self) -> Option<(Option<Token>, Option<Vec<Token>>)> {
+        let mut size: Option<Token> = None;
+        match self.tokens.peek().cloned() {
+            Some(Token::Symbol(':')) => {
+                self.tokens.next();
+                self.consume_whitespace();
+                let Some(token) = self.tokens.next() else {
+                    return None;
+                };
+                size = Some(token);
+                let end_of_statement = self.consume_whitespace();
+                if end_of_statement {
+                    return Some((size, None));
+                }
+            }
+            _ => {}
+        };
+
+        self.consume_whitespace();
+        let Some(Token::Symbol('=')) = self.tokens.peek().cloned() else {
+            return None;
+        };
+        self.tokens.next();
+        self.consume_whitespace();
+
+        let Some(Token::Symbol('[')) = self.tokens.peek().cloned() else {
+            return None;
+        };
+        self.tokens.next();
+        self.consume_whitespace();
+
+        let mut buffer = Vec::new();
+
+        loop {
+            match self.tokens.peek().cloned() {
+                Some(Token::Symbol(',')) => {
+                    self.tokens.next();
+                    self.consume_whitespace();
+                }
+                Some(Token::Symbol(']')) => {
+                    self.tokens.next();
+                    self.consume_whitespace();
+                    break;
+                }
+                Some(Token::Number(_)) => {
+                    buffer.push(self.tokens.next().unwrap());
+                    self.consume_whitespace();
+                }
+                _ => {
+                    return None;
+                }
+            }
+        }
+
+        return Some((size, Some(buffer)));
+    }
 }
 
 impl<TIterator> Iterator for Parser<TIterator>
@@ -169,6 +253,9 @@ where
                 self.tokens.next();
                 Some(ParseResult::Unknown(vec![Token::Number(number.to_owned())]))
             }
+            Some(Token::Symbol(unknown)) => Some(ParseResult::Unknown(vec![Token::Unknown(
+                unknown.to_owned(),
+            )])),
             Some(Token::Unknown(unknown)) => {
                 self.tokens.next();
                 Some(ParseResult::Unknown(vec![Token::Unknown(

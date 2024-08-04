@@ -1,17 +1,19 @@
 use std::io::{Read, Write};
 
 use chip8_assembler::{
-    lexer::Lexer,
+    lexer::{Lexer, Token},
     parser::{ParseResult, Parser},
-    resolver::{self, Resolver},
+    resolver::Resolver,
 };
-use chip8_core::OpCode;
 
 fn main() {
     let args = std::env::args().collect::<Vec<String>>();
 
     let input_file = args.get(1).expect("No input file provided");
     let output_file = args.get(2).expect("No output file provided");
+    let rest = args.get(3..).unwrap_or(&[]);
+    let lex_out = rest.contains(&"-l".to_owned());
+    let parser_out = rest.contains(&"-p".to_owned());
 
     println!("Input file: {}", input_file);
     println!("Output file: {}", output_file);
@@ -20,8 +22,29 @@ fn main() {
         .expect(format!("Could not open file {}", input_file).as_str());
     let buffered = std::io::BufReader::new(file);
     let chars = buffered.bytes().filter_map(|b| b.ok()).map(|b| b as char);
-    let lexer = Lexer::from_iter(chars);
-    let parser = Parser::from_iter(lexer);
+    let lexer: Box<dyn Iterator<Item = Token>> = if lex_out {
+        Box::new(Lexer::from_iter(chars).map(|token| {
+            match token {
+                Token::Whitespace('\n') => {
+                    println!("{:?}", token);
+                }
+                _ => {
+                    print!("L: {:?}", token);
+                }
+            }
+            token
+        }))
+    } else {
+        Box::new(Lexer::from_iter(chars))
+    };
+    let parser: Box<dyn Iterator<Item = ParseResult>> = if parser_out {
+        Box::new(Parser::from_iter(lexer).map(|parse_result| {
+            println!("P: {:?}", parse_result);
+            parse_result
+        }))
+    } else {
+        Box::new(Parser::from_iter(lexer))
+    };
     let mut resolver = Resolver::from_iter(parser);
     let output = resolver.resolve();
     // let output_bin = parser

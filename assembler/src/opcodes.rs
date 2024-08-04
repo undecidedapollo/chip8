@@ -1,7 +1,7 @@
 use crate::{error::Chip8AssemblerError, lexer::Token, parser::Statement};
 use chip8_core::OpCode;
 
-fn strip_hex_u8(instruction: &str) -> Option<u8> {
+pub(crate) fn strip_hex_u8(instruction: &str) -> Option<u8> {
     if instruction.starts_with("0x") {
         u8::from_str_radix(&instruction[2..], 16).ok()
     } else {
@@ -9,7 +9,7 @@ fn strip_hex_u8(instruction: &str) -> Option<u8> {
     }
 }
 
-fn strip_hex_u16(instruction: &str) -> Option<u16> {
+pub(crate) fn strip_hex_u16(instruction: &str) -> Option<u16> {
     if instruction.starts_with("0x") {
         u16::from_str_radix(&instruction[2..], 16).ok()
     } else {

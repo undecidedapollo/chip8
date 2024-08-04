@@ -37,6 +37,7 @@ name = "chip8-assembler"
 version = "0.1.0"
 dependencies = [
  "chip8-core",
+ "hexdump",
  "thiserror",
 ]
 
