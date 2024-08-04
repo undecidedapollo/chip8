@@ -159,7 +159,7 @@ where
                 };
             }
             '0'..='9' => self.lex_number(c),
-            ':' => self.lex_label(c),
+            '.' => self.lex_label(c),
             ';' => self.lex_comment(c),
             _ => Token::Unknown(c),
         }
@@ -225,8 +225,8 @@ mod unit_tests {
 
     #[test]
     fn lex_label() {
-        let mut lexer = Lexer::from_iter(":label".chars());
-        assert_eq!(lexer.next(), Some(Token::Label(":label".to_owned())));
+        let mut lexer = Lexer::from_iter(".label".chars());
+        assert_eq!(lexer.next(), Some(Token::Label(".label".to_owned())));
     }
 
     #[test]
@@ -255,8 +255,8 @@ mod unit_tests {
 
     #[test]
     fn lex_full_statement() {
-        let mut lexer = Lexer::from_iter(":start SKE 0x1234 ; comment".chars());
-        assert_eq!(lexer.next(), Some(Token::Label(":start".to_owned())));
+        let mut lexer = Lexer::from_iter(".start SKE 0x1234 ; comment".chars());
+        assert_eq!(lexer.next(), Some(Token::Label(".start".to_owned())));
         assert_eq!(lexer.next(), Some(Token::Whitespace(' ')));
         assert_eq!(lexer.next(), Some(Token::Mneumonic("SKE".to_owned())));
         assert_eq!(lexer.next(), Some(Token::Whitespace(' ')));
@@ -267,10 +267,10 @@ mod unit_tests {
 
     #[test]
     fn lex_lines_comment_label_statement() {
-        let mut lexer = Lexer::from_iter("; comment\n:label\nSKE 0x1234 ; comment".chars());
+        let mut lexer = Lexer::from_iter("; comment\n.label\nSKE 0x1234 ; comment".chars());
         assert_eq!(lexer.next(), Some(Token::Comment("; comment".to_owned())));
         assert_eq!(lexer.next(), Some(Token::Whitespace('\n')));
-        assert_eq!(lexer.next(), Some(Token::Label(":label".to_owned())));
+        assert_eq!(lexer.next(), Some(Token::Label(".label".to_owned())));
         assert_eq!(lexer.next(), Some(Token::Whitespace('\n')));
         assert_eq!(lexer.next(), Some(Token::Mneumonic("SKE".to_owned())));
         assert_eq!(lexer.next(), Some(Token::Whitespace(' ')));

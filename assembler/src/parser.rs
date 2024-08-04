@@ -199,10 +199,10 @@ mod tests {
 
     #[test]
     fn parse_label() {
-        let lexer = Lexer::from_iter(":label".chars());
+        let lexer = Lexer::from_iter(".label".chars());
         let mut parser = Parser::from_iter(lexer);
 
-        assert_eq!(parser.next(), Some(ParseResult::Label(":label".to_owned())));
+        assert_eq!(parser.next(), Some(ParseResult::Label(".label".to_owned())));
     }
 
     mod statement_permutations {
@@ -210,13 +210,13 @@ mod tests {
 
         #[test]
         fn parse_statement_label_mneu_op() {
-            let lexer = Lexer::from_iter(":label SKE 0x1234".chars());
+            let lexer = Lexer::from_iter(".label SKE 0x1234".chars());
             let mut parser = Parser::from_iter(lexer);
 
             assert_eq!(
                 parser.next(),
                 Some(ParseResult::Statement(Statement {
-                    label: Some(":label".to_owned()),
+                    label: Some(".label".to_owned()),
                     opcode: "SKE".to_owned(),
                     operands: vec![Token::Number("0x1234".to_owned())],
                     comment: None,
@@ -258,13 +258,13 @@ mod tests {
 
         #[test]
         fn parse_statement_label_mneu_op_comment() {
-            let lexer = Lexer::from_iter(":label SKE 0x1234 ; comment".chars());
+            let lexer = Lexer::from_iter(".label SKE 0x1234 ; comment".chars());
             let mut parser = Parser::from_iter(lexer);
 
             assert_eq!(
                 parser.next(),
                 Some(ParseResult::Statement(Statement {
-                    label: Some(":label".to_owned()),
+                    label: Some(".label".to_owned()),
                     opcode: "SKE".to_owned(),
                     operands: vec![Token::Number("0x1234".to_owned())],
                     comment: Some("; comment".to_owned()),
@@ -385,10 +385,10 @@ mod tests {
         fn example_program() {
             let lexer = Lexer::from_iter(
                 "
-                :start SKE 0x1234
+                .start SKE 0x1234
                 SKE 0x5678
                 ; comment
-                :label
+                .label
                 SKE 0x1234 ; comment
             "
                 .chars(),
@@ -398,7 +398,7 @@ mod tests {
             assert_eq!(
                 parser.next(),
                 Some(ParseResult::Statement(Statement {
-                    label: Some(":start".to_owned()),
+                    label: Some(".start".to_owned()),
                     opcode: "SKE".to_owned(),
                     operands: vec![Token::Number("0x1234".to_owned())],
                     comment: None,
@@ -420,7 +420,7 @@ mod tests {
                 Some(ParseResult::Comment("; comment".to_owned()))
             );
 
-            assert_eq!(parser.next(), Some(ParseResult::Label(":label".to_owned())));
+            assert_eq!(parser.next(), Some(ParseResult::Label(".label".to_owned())));
 
             assert_eq!(
                 parser.next(),
